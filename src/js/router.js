@@ -9,27 +9,27 @@ const routes = {
   dashboard: {
     title: 'Dashboard',
     page: 'dashboard',
-    path: '/index.html'
+    path: '/kapsul/index.html'
   },
   diary: {
     title: 'Diary',
     page: 'diary',
-    path: '/'
+    path: '/kapsul'
   },
   todo: {
     title: 'To-Do List',
     page: 'todo',
-    path: '/'
+    path: '/kapsul'
   },
   tulisan: {
     title: 'Tulisan',
     page: 'tulisan',
-    path: '/'
+    path: '/kapsul'
   },
   habit: {
     title: 'Habit',
     page: 'habit',
-    path: '/'
+    path: '/kapsul'
   }
 };
 
