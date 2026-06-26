@@ -1,0 +1,795 @@
+/* ==========================================
+   COMPONENTS - SEMUA ELEMEN INTERAKTIF
+   ========================================== */
+
+/* ==========================================
+   1. TOMBOL (BUTTONS)
+   ========================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-btn);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+  background: var(--color-bg-card);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-success {
+  background: var(--color-accent-success);
+  color: #fff;
+  border-color: var(--color-accent-success);
+}
+.btn-success:hover {
+  background: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--color-accent-danger);
+  border-color: var(--color-accent-danger);
+}
+.btn-danger:hover {
+  background: var(--color-accent-danger);
+  color: #fff;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-muted);
+}
+.btn-ghost:hover {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+  border-color: var(--color-primary-light);
+}
+
+.btn-sm {
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+}
+.btn-lg {
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+}
+
+/* ==========================================
+   2. FLOATING ACTION BUTTON (FAB)
+   ========================================== */
+.fab {
+  position: fixed;
+  bottom: 84px;
+  right: 24px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(90, 143, 106, 0.4);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  z-index: 90;
+}
+
+.fab:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 30px rgba(90, 143, 106, 0.5);
+}
+
+.fab:active {
+  transform: scale(0.95);
+}
+
+/* Sembunyikan FAB di desktop (karena ada tombol di sidebar/header), tampilkan di mobile */
+@media (min-width: 769px) {
+  .fab {
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .fab {
+    bottom: 76px;
+  }
+}
+@media (max-width: 480px) {
+  .fab {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+    bottom: 68px;
+    right: 16px;
+  }
+}
+
+/* ==========================================
+   3. KARTU (CARDS) - Untuk Diary, Tulisan, dll
+   ========================================== */
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  transition: all var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  gap: 0.8rem;
+}
+
+.card-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.card-meta {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.card-meta .mood-emoji-small {
+  font-size: 1.1rem;
+}
+
+.card-body {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  margin: 0.5rem 0 0.8rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+/* Kartu Khusus Diary (dengan border kiri berwarna) */
+.diary-card {
+  border-left: 4px solid var(--color-primary-light);
+  padding-left: 1.2rem;
+}
+
+/* Kartu Khusus Tulisan (Blog) */
+.article-card .card-title {
+  font-size: 1.3rem;
+}
+.article-card .card-body {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Badge Status (untuk tulisan draft/publish) */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-family: var(--font-ui);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-draft {
+  background: #f0ece5;
+  color: var(--color-text-muted);
+}
+.badge-published {
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
+}
+.badge-urgent {
+  background: #fde8e8;
+  color: var(--color-accent-danger);
+}
+
+/* ==========================================
+   4. TO-DO LIST ITEM
+   ========================================== */
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-btn);
+  background: var(--color-bg-main);
+  transition: all var(--transition);
+  border: 1px solid transparent;
+  margin-bottom: 0.4rem;
+}
+
+.todo-item:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg-card);
+}
+
+.todo-item .checkbox-custom {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: #fff;
+}
+
+.todo-item .checkbox-custom:hover {
+  border-color: var(--color-primary);
+}
+
+.todo-item .checkbox-custom.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.todo-item .checkbox-custom.checked i {
+  font-size: 0.7rem;
+}
+
+.todo-item .todo-label {
+  flex: 1;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  transition: all var(--transition);
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.todo-item.done .todo-label {
+  text-decoration: line-through;
+  color: var(--color-text-muted);
+}
+
+.todo-item .todo-deadline {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.todo-item .todo-deadline.urgent {
+  color: var(--color-accent-amber);
+  font-weight: 600;
+}
+
+.todo-item .todo-delete {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  transition: var(--transition);
+  font-size: 0.9rem;
+}
+.todo-item .todo-delete:hover {
+  color: var(--color-accent-danger);
+  background: rgba(217, 112, 112, 0.1);
+}
+
+/* Tabs To-Do */
+.todo-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: 0.2rem;
+}
+
+.todo-tabs .tab-btn {
+  padding: 0.4rem 1rem;
+  border: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-btn) var(--radius-btn) 0 0;
+  transition: all var(--transition);
+  position: relative;
+}
+
+.todo-tabs .tab-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.todo-tabs .tab-btn.active {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.todo-tabs .tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-primary);
+  border-radius: 20px;
+}
+
+/* ==========================================
+   5. HABIT GRID (HEATMAP)
+   ========================================== */
+.habit-grid-wrapper {
+  margin: 1rem 0;
+}
+
+.habit-grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+}
+
+.habit-grid-header h4 {
+  font-family: var(--font-ui);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.habit-grid-header .streak-count {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.habit-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  background: var(--color-bg-card);
+  padding: 0.8rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+}
+
+.habit-day {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  background: var(--color-border);
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 0.55rem;
+  color: var(--color-text-muted);
+  position: relative;
+}
+
+.habit-day.done {
+  background: var(--color-primary);
+  color: #fff;
+  transform: scale(1);
+}
+
+.habit-day.done::after {
+  content: '✓';
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.habit-day.skipped {
+  background: var(--color-accent-amber);
+  color: #fff;
+}
+
+.habit-day.today {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+.habit-day.empty {
+  background: transparent;
+  border: 1px dashed var(--color-border);
+}
+
+.habit-day:hover:not(.empty) {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================
+   6. FORM & INPUT
+   ========================================== */
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  background: var(--color-bg-card);
+  transition: all var(--transition);
+  color: var(--color-text-primary);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(90, 143, 106, 0.1);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: var(--font-serif);
+  line-height: 1.7;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6b6b' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* ==========================================
+   7. MOOD PICKER (DI PANEL KANAN)
+   ========================================== */
+.mood-emoji-list {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.2rem;
+}
+
+.mood-emoji {
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: all var(--transition);
+  padding: 0.2rem;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  transform: scale(1);
+}
+
+.mood-emoji:hover {
+  opacity: 0.8;
+  transform: scale(1.15);
+}
+
+.mood-emoji.active {
+  opacity: 1;
+  transform: scale(1.2);
+  background: var(--color-primary-bg);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* ==========================================
+   8. PROGRESS BAR (DI PANEL KANAN)
+   ========================================== */
+.progress-item {
+  margin-bottom: 0.8rem;
+}
+
+.progress-item span {
+  font-family: var(--font-ui);
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+.progress-fill.high {
+  background: var(--color-accent-success);
+}
+.progress-fill.medium {
+  background: var(--color-accent-amber);
+}
+.progress-fill.low {
+  background: var(--color-accent-danger);
+}
+
+/* ==========================================
+   9. QUOTE WIDGET (DI PANEL KANAN)
+   ========================================== */
+.quote-widget blockquote {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.5rem 0 0 1rem;
+  border-left: 3px solid var(--color-primary-light);
+  min-height: 60px;
+}
+
+/* ==========================================
+   10. STREAK WIDGET (DI PANEL KANAN)
+   ========================================== */
+.streak-number {
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  line-height: 1.2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.streak-number span {
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+/* ==========================================
+   11. EMPTY STATE (Saat tidak ada data)
+   ========================================== */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--color-text-muted);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  color: var(--color-border);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.empty-state h3 {
+  font-family: var(--font-serif);
+  font-size: 1.2rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+/* ==========================================
+   12. MODAL / OVERLAY (Untuk popup tambah/edit)
+   ========================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  padding: 2rem;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.3s ease;
+}
+
+.modal-content .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.modal-content .modal-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.4rem;
+  margin: 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: var(--transition);
+}
+.modal-close:hover {
+  background: #f0ece5;
+  color: var(--color-text-primary);
+}
+
+/* Animasi */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ==========================================
+   13. RESPONSIVE KOMPONEN (Mobile)
+   ========================================== */
+@media (max-width: 768px) {
+  .card {
+    padding: 1rem 1.2rem;
+  }
+
+  .card-meta {
+    font-size: 0.7rem;
+  }
+
+  .todo-item {
+    padding: 0.5rem 0.6rem;
+  }
+  .todo-item .todo-label {
+    font-size: 0.85rem;
+  }
+
+  .habit-grid {
+    padding: 0.5rem;
+    gap: 3px;
+  }
+
+  .modal-content {
+    padding: 1.2rem;
+    margin: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 0.8rem 1rem;
+  }
+  .card-title {
+    font-size: 1rem;
+  }
+  .card-body {
+    font-size: 0.88rem;
+  }
+
+  .mood-emoji {
+    font-size: 1.5rem;
+  }
+
+  .habit-day {
+    font-size: 0.45rem;
+    border-radius: 4px;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+  .modal-content .modal-header h2 {
+    font-size: 1.2rem;
+  }
+}

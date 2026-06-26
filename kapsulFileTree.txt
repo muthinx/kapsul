@@ -1,0 +1,54 @@
+/
+├── index.html               # SATU-SATUNYA halaman HTML. Berisi shell global (Sidebar, Bottom Nav, Header, div#app).
+│
+├── manifest.json            # File konfigurasi PWA (nama, ikon, tema, display: standalone).
+├── sw.js                    # Service Worker. Bertugas meng-cache shell & assets agar bisa offline.
+├── .nojekyll                # File kosong wajib untuk memberi tahu GitHub Pages agar TIDAK memproses Jekyll.
+│
+├── firebase.json            # (Opsional) Konfigurasi untuk Firebase Hosting jika suatu saat migrasi, abaikan jika murni Pages.
+│
+├── assets/
+│   ├── icons/
+│   │   ├── icon-192.png     # Ikon untuk PWA (ukuran 192x192)
+│   │   ├── icon-512.png     # Ikon untuk PWA (ukuran 512x512)
+│   │   └── favicon.ico      # Ikon tab browser
+│   └── images/              # Tempat ilustrasi, background, atau gambar statis lainnya.
+│
+├── src/                     # -- KELAS KERJA UTAMA APLIKASI --
+│   │
+│   ├── css/
+│   │   ├── style.css        # Gaya global (reset CSS, variabel warna, font dasar).
+│   │   ├── layout.css       # Gaya untuk grid 3 kolom (Desktop) dan fleksibilitas (Mobile).
+│   │   └── components.css   # Gaya untuk komponen kecil (kartu, tombol, form, checkbox habit).
+│   │
+│   ├── js/
+│   │   ├── main.js          # ENTRY POINT. Inisialisasi Firebase, listen status login (Auth), 
+│   │   │                    # dan memutuskan apakah tampilkan halaman Login atau masuk ke Router.
+│   │   │
+│   │   ├── router.js        # OTAK NAVIGASI. Fungsi navigateTo(page) untuk:
+│   │   │                    # 1. Update history.pushState.
+│   │   │                    # 2. Dynamic Import (memanggil file di /pages).
+│   │   │                    # 3. Menyuntikkan HTML ke div#content.
+│   │   │
+│   │   └── firebase-init.js # Koneksi ke Firebase. Ekspor `db` (Firestore) dan `auth` (Authentication)
+│   │                        # beserta fungsi login/logout.
+│   │
+│   ├── pages/               # -- SETIAP FILE = 1 HALAMAN UTAMA (DIINJEKSIKAN KE DIV#CONTENT) --
+│   │   ├── dashboard.js     # Ekspor fungsi render(). Isi: Feed kegiatan saat ini, timeline harian.
+│   │   ├── diary.js         # Ekspor fungsi render(). Isi: Daftar jurnal + tombol buat entri baru.
+│   │   ├── todo.js          # Ekspor fungsi render(). Isi: Tabs (Hari Ini / Mendatang / Selesai) + checklist.
+│   │   ├── tulisan.js       # Ekspor fungsi render(). Isi: Daftar artikel/blog pribadi.
+│   │   └── habit.js         # Ekspor fungsi render(). Isi: Heatmap / grid streak kebiasaan.
+│   │
+│   ├── components/          # -- KOMPONEN ULANG (DI PANGGIL OLEH FILE DI /PAGES) --
+│   │   ├── diary-card.js    # Fungsi untuk menghasilkan 1 kartu diary (mirip tweet).
+│   │   ├── todo-item.js     # Fungsi untuk menghasilkan 1 baris tugas dengan checkbox.
+│   │   ├── habit-grid.js    # Fungsi untuk menghasilkan kotak-kotak tanggal dalam sebulan.
+│   │   └── loader.js        # Fungsi untuk menampilkan animasi loading saat data Firestore diambil.
+│   │
+│   └── utils/               # -- FUNGSI PEMBANTU MURNI (TANPA DOM LANGSUNG) --
+│       ├── date-helper.js   # Ubah timestamp jadi "2 Jam lalu" atau format "Senin, 26 Juni".
+│       ├── dom-helper.js    # Fungsi untuk event delegation (agar tombol di konten injeksi bekerja).
+│       └── error-handler.js # Fungsi standar untuk menangkap error Firestore dan menampilkannya.
+│
+└── README.md                # Dokumentasi proyek (cara install, struktur, dsb).

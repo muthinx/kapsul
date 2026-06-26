@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Fungsi pembantu untuk mengecek kepemilikan data
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwnUser(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // ==========================================
+    // ATURAN UNTUK SEMUA DATA DI BAWAH /users/{userId}
+    // ==========================================
+    // Ini mencakup koleksi: diary, todos, habits, articles
+    match /users/{userId}/{document=**} {
+      allow read, write: if isAuthenticated() && isOwnUser(userId);
+    }
+
+    // ==========================================
+    // ATURAN UNTUK KOLEKSI ROOT (jika ada)
+    // ==========================================
+    // Kita blokir semua akses ke koleksi root untuk keamanan maksimal
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+  }
+}

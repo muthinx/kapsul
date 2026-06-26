@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#f5f1eb">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+    <link rel="icon" type="image/png" href="assets/icons/favicon.ico">
+    
+    <title>Kapsul</title>
+
+    <!-- Font Awesome untuk ikon sosial media -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- CSS Global -->
+    <link rel="stylesheet" href="src/css/style.css">
+    <link rel="stylesheet" href="src/css/layout.css">
+    <link rel="stylesheet" href="src/css/components.css">
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- SHELL APLIKASI (HANYA TERLIHAT SAAT LOGIN) -->
+    <!-- ========================================== -->
+    <div id="app" class="app-container">
+
+        <!-- ================== -->
+        <!-- 1. SIDEBAR KIRI    -->
+        <!-- ================== -->
+        <aside id="sidebar">
+            <div class="sidebar-brand">
+                <h1 class="brand-name">Kapsul</h1>
+                <span class="brand-tagline">buat harimu lebih berarti</span>
+            </div>
+
+            <nav class="sidebar-nav" id="nav-menu">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" data-page="diary">
+                    <i class="fas fa-book"></i> Diary
+                </a>
+                <a href="#" class="nav-item" data-page="todo">
+                    <i class="fas fa-check-circle"></i> To-Do List
+                </a>
+                <a href="#" class="nav-item" data-page="tulisan">
+                    <i class="fas fa-pen-fancy"></i> Tulisan
+                </a>
+                <a href="#" class="nav-item" data-page="habit">
+                    <i class="fas fa-fire"></i> Habit
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </button>
+                <div class="user-avatar-sidebar">
+                    <img id="sidebar-avatar" src="assets/images/default-avatar.png" alt="Avatar">
+                </div>
+            </div>
+        </aside>
+
+        <!-- ======================== -->
+        <!-- 2. KONTEN UTAMA (TENGAH) -->
+        <!-- ======================== -->
+        <main id="main-content">
+            <!-- Header Atas (Judul + Avatar) -->
+            <header id="top-header">
+                <h2 id="page-title">Dashboard</h2>
+                <div class="header-user">
+                    <span class="user-greeting">Halo, <span id="user-name">Beast</span></span>
+                    <img id="header-avatar" src="assets/images/default-avatar.png" alt="Avatar" class="avatar-circle">
+                </div>
+            </header>
+
+            <!-- Tempat Inject Halaman (Diisi oleh JS) -->
+            <div id="content">
+                <!-- Awalnya akan muncul loading spinner dari komponen loader -->
+                <div class="loader-wrapper">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Memuat lembaran harimu...</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- ======================== -->
+        <!-- 3. PANEL KANAN (INFO)    -->
+        <!-- ======================== -->
+        <aside id="right-panel">
+            <div class="widget mood-widget">
+                <h4><i class="fas fa-smile"></i> Mood Hari Ini</h4>
+                <div class="mood-emoji-list">
+                    <span class="mood-emoji" data-mood="sangat-buruk">😡</span>
+                    <span class="mood-emoji" data-mood="buruk">😟</span>
+                    <span class="mood-emoji" data-mood="biasa">😐</span>
+                    <span class="mood-emoji" data-mood="baik">🙂</span>
+                    <span class="mood-emoji" data-mood="sangat-baik">😍</span>
+                </div>
+            </div>
+
+            <div class="widget streak-widget">
+                <h4><i class="fas fa-calendar-check"></i> Streak</h4>
+                <div class="streak-number">0 <span>hari</span></div>
+                <p>Terus konsisten!</p>
+            </div>
+
+            <div class="widget quote-widget">
+                <h4><i class="fas fa-quote-left"></i> Quote</h4>
+                <blockquote id="daily-quote">"Hari ini adalah awal dari segalanya."</blockquote>
+            </div>
+
+            <div class="widget progress-widget">
+                <h4><i class="fas fa-chart-simple"></i> Progress Hari Ini</h4>
+                <div class="progress-item">
+                    <span>To-Do Selesai</span>
+                    <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+                    <span class="progress-label">0/0</span>
+                </div>
+                <div class="progress-item">
+                    <span>Habit Tercapai</span>
+                    <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+                    <span class="progress-label">0/0</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 4. BOTTOM NAVIGATION (KHUSUS MOBILE/HP)   -->
+    <!-- ========================================== -->
+    <nav id="bottom-nav">
+        <a href="#" class="bottom-nav-item active" data-page="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="diary">
+            <i class="fas fa-book"></i>
+            <span>Diary</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="todo">
+            <i class="fas fa-check-circle"></i>
+            <span>To-Do</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="tulisan">
+            <i class="fas fa-pen-fancy"></i>
+            <span>Tulis</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="habit">
+            <i class="fas fa-fire"></i>
+            <span>Habit</span>
+        </a>
+    </nav>
+
+    <!-- ========================================== -->
+    <!-- 5. DEPENDENSI FIREBASE (Import Map)       -->
+    <!-- ========================================== -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js",
+                "firebase/auth": "https://www.gstatic.com/firebasejs/10.12.4/firebase-auth.js",
+                "firebase/firestore": "https://www.gstatic.com/firebasejs/10.12.4/firebase-firestore.js"
+            }
+        }
+    </script>
+
+    <!-- ========================================== -->
+    <!-- 6. ENTRY POINT JAVASCRIPT                 -->
+    <!-- ========================================== -->
+    <script type="module" src="src/js/main.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "Kapsul Waktu",
+  "short_name": "Kapsul",
+  "description": "Buat harimu lebih berarti",
+  "start_url": "./index.html",
+  "icons": [
+    {
+      "src": "web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}
