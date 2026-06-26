@@ -10,18 +10,18 @@ const CACHE_NAME = 'kapsul-shell-v1';
 // ==========================================
 const ASSETS_TO_CACHE = [
   // Root & HTML
-  '/',
-  '/index.html',
+  './',
+  'index.html',
 
   // CSS (Global, Layout, Komponen)
-  '/src/css/style.css',
-  '/src/css/layout.css',
-  '/src/css/components.css',
+  'src/css/style.css',
+  'src/css/layout.css',
+  'src/css/components.css',
 
   // Core JavaScript (Entry Point & Router)
-  '/src/js/main.js',
-  '/src/js/router.js',
-  '/src/js/firebase-init.js',
+  'src/js/main.js',
+  'src/js/router.js',
+  'src/js/firebase-init.js',
 
   // Firebase SDK (dari Import Map)
   'https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js',
@@ -32,7 +32,7 @@ const ASSETS_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
 
   // File manifest (agar splash screen tetap muncul offline)
-  '/manifest.json'
+  'manifest.json'
 ];
 
 // ==========================================
