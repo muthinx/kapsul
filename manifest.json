@@ -2,34 +2,34 @@
   "name": "Kapsul - buat harimu lebih berarti",
   "short_name": "Kapsul",
   "description": "Jurnal pribadi dengan nuansa media sosial. Catat diary, todo, tulisan, dan kebiasaanmu setiap hari.",
-  "start_url": "/",
+  "start_url": "/kapsul/",
   "display": "standalone",
   "orientation": "portrait",
-  "scope": "/",
+  "scope": "/kapsul/",
   "background_color": "#faf7f0",
   "theme_color": "#5a8f6a",
   "categories": ["lifestyle", "productivity", "personalization"],
   "icons": [
     {
-      "src": "assets/icons/icon-192.png",
+      "src": "/kapsul/assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/icons/icon-192.png",
+      "src": "/kapsul/assets/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "assets/icons/icon-512.png",
+      "src": "/kapsul/assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/icons/icon-512.png",
+      "src": "/kapsul/assets/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
