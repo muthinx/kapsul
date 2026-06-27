@@ -17,11 +17,13 @@ import {
   getDoc
 } from 'firebase/firestore';
 import { getLocalDateString } from '../utils/date-helper.js';
+import { showFullscreenLoader, hideFullscreenLoader } from '../components/loader.js';
 
 // ==========================================
 // 1. STATE
 // ==========================================
 let currentFilter = 'all'; // all | draft | published
+let currentViewingId = null; // ID artikel yang sedang dibaca
 
 // ==========================================
 // 2. FUNGSI RENDER UTAMA
@@ -35,7 +37,6 @@ export async function render() {
   const uid = user.uid;
 
   try {
-    // Ambil semua tulisan user, urutkan dari yang terbaru
     const articleRef = collection(db, 'users', uid, 'articles');
     const q = query(articleRef, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
@@ -45,7 +46,6 @@ export async function render() {
       articles.push({ id: doc.id, ...doc.data() });
     });
 
-    // Filter berdasarkan status
     let filteredArticles = articles;
     if (currentFilter === 'draft') {
       filteredArticles = articles.filter(a => a.status === 'draft');
@@ -87,7 +87,10 @@ export async function render() {
         const statusBadge = article.status === 'published' 
           ? '<span class="badge badge-published">Terbit</span>'
           : '<span class="badge badge-draft">Draft</span>';
-        const dateStr = article.date || new Date(article.createdAt?.toDate?.() || Date.now()).toISOString().split('T')[0];
+        const dateStr = article.date || getLocalDateString();
+        
+        // Gunakan excerpt jika ada, jika tidak ambil 100 karakter pertama dari content
+        const excerpt = article.excerpt || (article.content || '').substring(0, 100) + '...';
 
         return `
           <div class="card article-card" data-id="${article.id}" style="margin-bottom:1rem;">
@@ -110,16 +113,22 @@ export async function render() {
                 </button>
               </div>
             </div>
-            <div class="card-body" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-family:var(--font-serif);font-size:0.95rem;color:var(--color-text-secondary);">
-              ${article.content || ''}
+            
+            <!-- EXCERPT / POTONGAN ARTIKEL -->
+            <div class="card-body" style="font-family:var(--font-serif);font-size:0.95rem;color:var(--color-text-secondary);line-height:1.7;margin-bottom:0.5rem;">
+              ${excerpt}
             </div>
-            <div class="card-actions">
-              ${article.status === 'draft' 
-                ? `<button class="btn btn-success btn-sm" onclick="window.__publishArticle('${article.id}')"><i class="fas fa-check"></i> Terbitkan</button>`
-                : `<button class="btn btn-ghost btn-sm" onclick="window.__unpublishArticle('${article.id}')"><i class="fas fa-undo"></i> Kembalikan ke Draft</button>`
-              }
-              <button class="btn btn-ghost btn-sm" onclick="window.__openArticleModal('${article.id}')">
-                <i class="fas fa-edit"></i> Edit
+            
+            <div class="card-actions" style="justify-content:space-between;border-top:1px solid var(--color-border);padding-top:0.8rem;margin-top:0.2rem;">
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                ${article.status === 'draft' 
+                  ? `<button class="btn btn-success btn-sm" onclick="window.__publishArticle('${article.id}')"><i class="fas fa-check"></i> Terbitkan</button>`
+                  : `<button class="btn btn-ghost btn-sm" onclick="window.__unpublishArticle('${article.id}')"><i class="fas fa-undo"></i> Kembalikan ke Draft</button>`
+                }
+              </div>
+              <!-- TOMBOL BACA SELENGKAPNYA -->
+              <button class="btn btn-primary btn-sm" onclick="window.__readArticle('${article.id}')">
+                <i class="fas fa-book-open"></i> Baca Selengkapnya
               </button>
             </div>
           </div>
@@ -146,6 +155,9 @@ export async function render() {
 
         <!-- Modal untuk Tambah/Edit -->
         <div id="article-modal-container"></div>
+        
+        <!-- Modal untuk Baca Selengkapnya -->
+        <div id="article-read-container"></div>
       </div>
     `;
 
@@ -174,7 +186,7 @@ window.__openArticleModal = async (articleId = null) => {
   const title = isEdit ? 'Edit Tulisan' : 'Tulis Artikel Baru';
   const submitText = isEdit ? 'Simpan Perubahan' : 'Simpan';
 
-  let editData = { title: '', content: '', tags: '', status: 'draft', date: '' };
+  let editData = { title: '', excerpt: '', content: '', tags: '', status: 'draft', date: '' };
   if (isEdit) {
     try {
       const user = auth.currentUser;
@@ -195,6 +207,7 @@ window.__openArticleModal = async (articleId = null) => {
   }
 
   const editTitle = editData.title || '';
+  const editExcerpt = editData.excerpt || '';
   const editContent = editData.content || '';
   const editTags = editData.tags || '';
   const editStatus = editData.status || 'draft';
@@ -211,6 +224,12 @@ window.__openArticleModal = async (articleId = null) => {
           <div class="form-group">
             <label class="form-label">Judul <span style="color:var(--color-accent-danger);">*</span></label>
             <input type="text" id="article-title" class="form-input" placeholder="Judul tulisan..." value="${editTitle}" required>
+          </div>
+          <!-- INPUT EXCERPT (POTONGAN ARTIKEL) -->
+          <div class="form-group">
+            <label class="form-label">Potongan Artikel (Excerpt)</label>
+            <textarea id="article-excerpt" class="form-textarea" placeholder="Tulis cuplikan singkat yang akan tampil di halaman utama..." rows="3" style="min-height:60px;">${editExcerpt}</textarea>
+            <small style="color:var(--color-text-muted);font-size:0.7rem;">Akan tampil di card halaman utama bersama judul. Kosongkan jika ingin menggunakan 100 karakter pertama dari isi artikel.</small>
           </div>
           <div class="form-group">
             <label class="form-label">Isi Tulisan (Markdown / Teks biasa)</label>
@@ -241,10 +260,8 @@ window.__openArticleModal = async (articleId = null) => {
     </div>
   `;
 
-  // Simpan ID edit
   window.__articleEditId = isEdit ? articleId : null;
 
-  // Event submit form
   document.getElementById('article-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     await window.__saveArticle();
@@ -267,6 +284,7 @@ window.__saveArticle = async () => {
   }
 
   const title = document.getElementById('article-title').value.trim();
+  const excerpt = document.getElementById('article-excerpt').value.trim();
   const content = document.getElementById('article-content').value.trim();
   const tags = document.getElementById('article-tags').value.trim();
   const date = document.getElementById('article-date').value;
@@ -284,12 +302,14 @@ window.__saveArticle = async () => {
   const uid = user.uid;
   const articleRef = collection(db, 'users', uid, 'articles');
 
+  showFullscreenLoader('Menyimpan tulisan...');
+
   try {
     if (window.__articleEditId) {
-      // EDIT
       const docRef = doc(db, 'users', uid, 'articles', window.__articleEditId);
       await updateDoc(docRef, {
         title: title,
+        excerpt: excerpt || '',
         content: content,
         tags: tags || '',
         date: date,
@@ -298,9 +318,9 @@ window.__saveArticle = async () => {
       });
       console.log('[Tulisan] Update berhasil:', window.__articleEditId);
     } else {
-      // TAMBAH
       await addDoc(articleRef, {
         title: title,
+        excerpt: excerpt || '',
         content: content,
         tags: tags || '',
         date: date,
@@ -312,12 +332,13 @@ window.__saveArticle = async () => {
     }
 
     window.__closeArticleModal();
-    // Reload halaman
+    hideFullscreenLoader();
     import('../js/router.js').then(module => {
-      module.navigateTo('tulisan');
+      module.navigateTo('tulisan', true);
     });
   } catch (error) {
     console.error('[Tulisan] Gagal menyimpan:', error);
+    hideFullscreenLoader();
     alert('Gagal menyimpan tulisan: ' + error.message);
   }
 };
@@ -334,32 +355,107 @@ window.__deleteArticle = async (articleId) => {
     return;
   }
 
+  showFullscreenLoader('Menghapus tulisan...', 'fa-trash');
+
   try {
     const docRef = doc(db, 'users', user.uid, 'articles', articleId);
     await deleteDoc(docRef);
     console.log('[Tulisan] Hapus berhasil:', articleId);
-
+    hideFullscreenLoader();
     import('../js/router.js').then(module => {
-      module.navigateTo('tulisan');
+      module.navigateTo('tulisan', true);
     });
   } catch (error) {
     console.error('[Tulisan] Gagal menghapus:', error);
+    hideFullscreenLoader();
     alert('Gagal menghapus tulisan: ' + error.message);
   }
 };
 
-// 4e. Edit Artikel (buka modal dengan data)
-window.__editArticle = async (articleId) => {
-  await window.__openArticleModal(articleId);
+// 4e. Edit Artikel
+window.__editArticle = (articleId) => {
+  window.__openArticleModal(articleId);
 };
 
-// 4f. Terbitkan Artikel
+// 4f. Baca Selengkapnya
+window.__readArticle = async (articleId) => {
+  const user = auth.currentUser;
+  if (!user) {
+    alert('Silakan login terlebih dahulu');
+    return;
+  }
+
+  try {
+    const docRef = doc(db, 'users', user.uid, 'articles', articleId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      alert('Tulisan tidak ditemukan');
+      return;
+    }
+
+    const article = { id: articleId, ...docSnap.data() };
+    currentViewingId = articleId;
+
+    const container = document.getElementById('article-read-container');
+    if (!container) return;
+
+    const dateStr = article.date || getLocalDateString();
+    const statusBadge = article.status === 'published' 
+      ? '<span class="badge badge-published">Terbit</span>'
+      : '<span class="badge badge-draft">Draft</span>';
+
+    container.innerHTML = `
+      <div class="modal-overlay" id="article-read-modal">
+        <div class="modal-content" style="max-width:800px;max-height:90vh;overflow-y:auto;">
+          <div class="modal-header">
+            <h2 style="font-family:var(--font-serif);font-size:1.6rem;">${article.title || 'Tanpa Judul'}</h2>
+            <button class="modal-close" onclick="window.__closeReadArticle()">✕</button>
+          </div>
+          <div style="margin-bottom:1rem;font-size:0.85rem;color:var(--color-text-secondary);display:flex;gap:0.8rem;flex-wrap:wrap;">
+            <span>📅 ${dateStr}</span>
+            <span>${statusBadge}</span>
+            ${article.tags ? `<span>🏷️ ${article.tags}</span>` : ''}
+          </div>
+          <div style="font-family:var(--font-serif);font-size:1.05rem;line-height:1.8;color:var(--color-text-primary);white-space:pre-wrap;word-wrap:break-word;">
+            ${article.content || ''}
+          </div>
+          <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--color-border);display:flex;gap:0.8rem;flex-wrap:wrap;">
+            ${article.status === 'draft' 
+              ? `<button class="btn btn-success btn-sm" onclick="window.__publishArticle('${article.id}'); window.__closeReadArticle();"><i class="fas fa-check"></i> Terbitkan</button>`
+              : `<button class="btn btn-ghost btn-sm" onclick="window.__unpublishArticle('${article.id}'); window.__closeReadArticle();"><i class="fas fa-undo"></i> Kembalikan ke Draft</button>`
+            }
+            <button class="btn btn-ghost btn-sm" onclick="window.__editArticle('${article.id}'); window.__closeReadArticle();">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-danger btn-sm" onclick="window.__deleteArticle('${article.id}'); window.__closeReadArticle();">
+              <i class="fas fa-trash"></i> Hapus
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('[Tulisan] Gagal membaca artikel:', error);
+    alert('Gagal memuat artikel: ' + error.message);
+  }
+};
+
+// 4g. Tutup Modal Baca
+window.__closeReadArticle = () => {
+  const container = document.getElementById('article-read-container');
+  if (container) container.innerHTML = '';
+  currentViewingId = null;
+};
+
+// 4h. Terbitkan Artikel
 window.__publishArticle = async (articleId) => {
   const user = auth.currentUser;
   if (!user) {
     alert('Silakan login terlebih dahulu');
     return;
   }
+
+  showFullscreenLoader('Menerbitkan tulisan...', 'fa-check');
 
   try {
     const docRef = doc(db, 'users', user.uid, 'articles', articleId);
@@ -368,23 +464,26 @@ window.__publishArticle = async (articleId) => {
       updatedAt: serverTimestamp()
     });
     console.log('[Tulisan] Terbit berhasil:', articleId);
-
+    hideFullscreenLoader();
     import('../js/router.js').then(module => {
-      module.navigateTo('tulisan');
+      module.navigateTo('tulisan', true);
     });
   } catch (error) {
     console.error('[Tulisan] Gagal menerbitkan:', error);
+    hideFullscreenLoader();
     alert('Gagal menerbitkan tulisan: ' + error.message);
   }
 };
 
-// 4g. Kembalikan ke Draft
+// 4i. Kembalikan ke Draft
 window.__unpublishArticle = async (articleId) => {
   const user = auth.currentUser;
   if (!user) {
     alert('Silakan login terlebih dahulu');
     return;
   }
+
+  showFullscreenLoader('Mengembalikan ke draft...', 'fa-undo');
 
   try {
     const docRef = doc(db, 'users', user.uid, 'articles', articleId);
@@ -393,12 +492,13 @@ window.__unpublishArticle = async (articleId) => {
       updatedAt: serverTimestamp()
     });
     console.log('[Tulisan] Kembali draft berhasil:', articleId);
-
+    hideFullscreenLoader();
     import('../js/router.js').then(module => {
-      module.navigateTo('tulisan');
+      module.navigateTo('tulisan', true);
     });
   } catch (error) {
     console.error('[Tulisan] Gagal mengembalikan draft:', error);
+    hideFullscreenLoader();
     alert('Gagal mengembalikan ke draft: ' + error.message);
   }
 };
@@ -437,3 +537,5 @@ render = async function() {
   }, 100);
   return result;
 };
+
+export { render as default };
