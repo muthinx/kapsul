@@ -44,6 +44,7 @@ function showAppShell() {
 
   // Tampilkan shell
   if (appShell) appShell.style.display = 'grid';
+  if (bottomNav) bottomNav.style.display = 'flex';
 }
 
 // ==========================================
