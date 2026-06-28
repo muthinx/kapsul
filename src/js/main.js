@@ -14,8 +14,8 @@ import {
   GoogleAuthProvider,
   signOut
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp, collection, query, where, getDocs } from 'firebase/firestore';
-import { navigateTo, initRouter } from './router.js';
+import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs } from 'firebase/firestore';
+import { navigateTo, initRouter, destroyRouter } from './router.js';
 
 // ==========================================
 // 2. REFERENSI DOM
@@ -27,22 +27,23 @@ const authContainerId = 'auth-container';
 // ==========================================
 // 3. FUNGSI MENAMPILKAN / MENYEMBUNYIKAN SHELL
 // ==========================================
+
+// Sembunyikan shell segera (dipanggil di awal)
+function hideAppShell() {
+  if (appShell) appShell.style.display = 'none';
+  if (bottomNav) bottomNav.style.display = 'none';
+}
+
+// Tampilkan shell dan hapus halaman login
 function showAppShell() {
-  // Tampilkan grid 3 kolom
-  appShell.style.display = 'grid';
-  // Tampilkan bottom nav (khusus mobile)
-  bottomNav.style.display = 'flex';
-  
   // Hapus container login jika ada
   const existingAuth = document.getElementById(authContainerId);
   if (existingAuth) {
     existingAuth.remove();
   }
-}
 
-function hideAppShell() {
-  appShell.style.display = 'none';
-  bottomNav.style.display = 'none';
+  // Tampilkan shell
+  if (appShell) appShell.style.display = 'grid';
 }
 
 // ==========================================
@@ -127,7 +128,7 @@ function renderAuthPage() {
   document.body.insertBefore(authContainer, appShell);
 
   // ==========================================
-  // 5. REFERENSI ELEMEN (DEKLARASI DI AWAL)
+  // 5. REFERENSI ELEMEN
   // ==========================================
   const loginForm = authContainer.querySelector('#login-form');
   const registerForm = authContainer.querySelector('#register-form');
@@ -204,48 +205,42 @@ function renderAuthPage() {
 }
 
 // ==========================================
-// 6. FUNGSI AUTH (LOGIN, REGISTER, GOOGLE, LOGOUT)
+// 8. FUNGSI AUTH
 // ==========================================
 
-// 6a. Login Email
+// 8a. Login Email
 async function handleLogin(email, password) {
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    // Auth state listener akan menangani sisanya
   } catch (error) {
     alert('Login gagal: ' + error.message);
     console.error('[Auth] Login error:', error);
   }
 }
 
-// 6b. Register Email
+// 8b. Register Email
 async function handleRegister(name, email, password) {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
-    // Simpan nama pengguna di Firestore (koleksi /users/{uid})
     const userRef = doc(db, 'users', user.uid);
     await setDoc(userRef, {
-      name: name,
+      name: name || 'Pengguna',
       email: user.email,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     }, { merge: true });
-
-    // Auth state listener akan menangani sisanya
   } catch (error) {
     alert('Registrasi gagal: ' + error.message);
     console.error('[Auth] Register error:', error);
   }
 }
 
-// 6c. Login dengan Google
+// 8c. Login dengan Google
 async function handleGoogleLogin() {
   const provider = new GoogleAuthProvider();
   try {
     await signInWithPopup(auth, provider);
-    // Auth state listener akan menangani sisanya
   } catch (error) {
     if (error.code !== 'auth/popup-closed-by-user') {
       alert('Login dengan Google gagal: ' + error.message);
@@ -254,11 +249,10 @@ async function handleGoogleLogin() {
   }
 }
 
-// 6d. Logout
+// 8d. Logout
 async function handleLogout() {
   try {
     await signOut(auth);
-    // Auth state listener akan menangani sisanya
   } catch (error) {
     console.error('[Auth] Logout error:', error);
     alert('Gagal keluar: ' + error.message);
@@ -266,43 +260,54 @@ async function handleLogout() {
 }
 
 // ==========================================
-// 7. UPDATE USER INFO DI SHELL
+// 9. UPDATE USER INFO (ASYNC)
 // ==========================================
-function updateUserUI(user) {
-  // Ambil nama dari Firestore
-  const userRef = doc(db, 'users', user.uid);
-  getDoc(userRef).then((docSnap) => {
+async function updateUserUI(user) {
+  try {
+    const userRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userRef);
+    let displayName = 'Pengguna';
+    let photoURL = 'assets/images/default-avatar.png';
+
     if (docSnap.exists()) {
       const data = docSnap.data();
-      const displayName = data.name || user.displayName || 'Pengguna';
-      
-      // Update nama di header
-      const nameSpan = document.getElementById('user-name');
-      if (nameSpan) nameSpan.textContent = displayName;
-      
-      // Update avatar di header dan sidebar (jika ada)
-      const avatarElements = document.querySelectorAll('#header-avatar, #sidebar-avatar');
-      const photoURL = user.photoURL || 'assets/images/default-avatar.png';
-      avatarElements.forEach(el => {
-        if (el) el.src = photoURL;
-      });
+      displayName = data.name || user.displayName || 'Pengguna';
+    } else {
+      // Buat dokumen user jika belum ada
+      await setDoc(userRef, {
+        name: user.displayName || 'Pengguna',
+        email: user.email,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      displayName = user.displayName || 'Pengguna';
     }
-  }).catch((error) => {
+
+    // Update UI
+    const nameSpan = document.getElementById('user-name');
+    if (nameSpan) nameSpan.textContent = displayName;
+
+    const avatarElements = document.querySelectorAll('#header-avatar, #sidebar-avatar');
+    const avatarUrl = user.photoURL || photoURL;
+    avatarElements.forEach(el => {
+      if (el) el.src = avatarUrl;
+    });
+
+    return displayName;
+  } catch (error) {
     console.warn('[Auth] Gagal mengambil data user:', error);
-    // Fallback: pakai displayName dari auth
     const nameSpan = document.getElementById('user-name');
     if (nameSpan) nameSpan.textContent = user.displayName || 'Pengguna';
-  });
+    return user.displayName || 'Pengguna';
+  }
 }
 
 // ==========================================
-// 8. UPDATE RIGHT PANEL (SIDEBAR KANAN)
+// 10. UPDATE RIGHT PANEL
 // ==========================================
-
 export async function updateRightPanel() {
   const user = auth.currentUser;
   if (!user) {
-    // Sembunyikan panel atau tampilkan kosong
     document.getElementById('right-panel').innerHTML = `
       <div class="widget" style="text-align:center;padding:2rem 1rem;">
         <p style="color:var(--color-text-muted);font-size:0.85rem;">Silakan login</p>
@@ -315,7 +320,6 @@ export async function updateRightPanel() {
   const todayString = new Date().toISOString().split('T')[0];
 
   try {
-    // Ambil data secara paralel
     const [todosSnap, diarySnap, habitsSnap] = await Promise.all([
       getDocs(collection(db, 'users', uid, 'todos')),
       getDocs(collection(db, 'users', uid, 'diary')),
@@ -331,37 +335,29 @@ export async function updateRightPanel() {
     const habits = [];
     habitsSnap.forEach(doc => habits.push({ id: doc.id, ...doc.data() }));
 
-    // Hitung statistik
     const todayTodos = todos.filter(t => t.deadline === todayString);
     const doneTodos = todayTodos.filter(t => t.done === true);
     const todoProgress = todayTodos.length > 0 ? Math.round((doneTodos.length / todayTodos.length) * 100) : 0;
 
-    // Hitung habit yang sudah dikerjakan hari ini
     let habitsDone = 0;
     habits.forEach(habit => {
-      if (habit.logs && habit.logs[todayString] === true) {
-        habitsDone++;
-      }
+      if (habit.logs && habit.logs[todayString] === true) habitsDone++;
     });
     const habitProgress = habits.length > 0 ? Math.round((habitsDone / habits.length) * 100) : 0;
 
-    // Hitung streak dari habit pertama (ambil yang tertinggi)
     let maxStreak = 0;
     habits.forEach(habit => {
       const streak = habit.streak || 0;
       if (streak > maxStreak) maxStreak = streak;
     });
 
-    // Mood hari ini (ambil dari diary terakhir hari ini)
     const todayDiary = diaries.filter(d => d.date === todayString);
     let todayMood = '😐';
     if (todayDiary.length > 0) {
-      // Ambil mood dari diary terbaru hari ini
       const latest = todayDiary.sort((a, b) => (b.createdAt?.toDate?.() || 0) - (a.createdAt?.toDate?.() || 0))[0];
       if (latest.mood) todayMood = latest.mood;
     }
 
-    // Quote acak (sederhana)
     const quotes = [
       '"Hari ini adalah awal dari segalanya."',
       '"Kamu lebih kuat dari yang kamu pikirkan."',
@@ -371,7 +367,6 @@ export async function updateRightPanel() {
     ];
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
-    // Update HTML panel kanan
     const rightPanel = document.getElementById('right-panel');
     if (!rightPanel) return;
 
@@ -412,7 +407,6 @@ export async function updateRightPanel() {
     console.log('[RightPanel] Updated');
   } catch (error) {
     console.error('[RightPanel] Error:', error);
-    // Tampilkan pesan error di panel
     const rightPanel = document.getElementById('right-panel');
     if (rightPanel) {
       rightPanel.innerHTML = `
@@ -425,47 +419,56 @@ export async function updateRightPanel() {
 }
 
 // ==========================================
-// 9. AUTH STATE LISTENER (INTI APLIKASI)
+// 11. AUTH STATE LISTENER (INTI APLIKASI)
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     // ========== USER LOGIN ==========
     console.log('[Auth] User login:', user.uid);
 
-    // Update UI dengan data user
-    updateUserUI(user);
+    // 1. Tampilkan shell dan hapus login page
+    showAppShell();
 
-    // Inisialisasi Router (jika belum)
-    // Router akan otomatis mengambil alih navigasi dan inject konten
+    // 2. Inisialisasi router
     initRouter();
 
-    // Navigasi ke Dashboard (halaman default)
-    navigateTo('dashboard');
+    // 3. Update UI user (ambil nama dari Firestore)
+    await updateUserUI(user);
 
-    // Pasang event listener untuk tombol logout (hanya sekali)
+    // 4. Update panel kanan
+    await updateRightPanel();
+
+    // 5. Navigasi ke dashboard
+    import('../js/router.js').then(module => {
+      module.navigateTo('dashboard', true);
+    });
+
+    // 6. Pasang listener logout
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-      // Clone node untuk menghilangkan listener lama (jika ada)
       const newLogoutBtn = logoutBtn.cloneNode(true);
       logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
       newLogoutBtn.addEventListener('click', handleLogout);
     }
 
-    // Pasang event listener untuk menu navigasi (sidebar & bottom nav)
-    // Karena kita menggunakan event delegation global di router, tidak perlu pasang lagi.
-    // Tapi kita tetap pastikan navigasi berfungsi.
-
   } else {
     // ========== USER LOGOUT / TIDAK LOGIN ==========
     console.log('[Auth] User logout / tidak login');
 
-    // Hancurkan router jika ada (biarkan saja, nanti di-reinit)
+    // Hancurkan router
+    destroyRouter();
+
     // Tampilkan halaman login
     renderAuthPage();
   }
 });
 
 // ==========================================
-// 10. EKSPOR FUNGSI LOGOUT (jika dibutuhkan komponen lain)
+// 12. EKSPOR FUNGSI LOGOUT & UPDATE PANEL
 // ==========================================
 export { handleLogout };
+
+// ==========================================
+// 13. PASTIKAN SHELL TERSEMBUNYI DI AWAL
+// ==========================================
+hideAppShell();
